@@ -1,0 +1,365 @@
+
+
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Matside Scorekeeper</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&display=swap">
+<style>
+:root{--bg:#14171a;--panel:#1e2327;--line:#323a40;--tx:#f3f1ea;--mut:#9aa4aa;--red:#d8392f;--grn:#1f9d55;--led:#ffb81f;
+--num:'Barlow Condensed','Arial Narrow',Impact,sans-serif;--ui:'Barlow',system-ui,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.35 var(--ui)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 10px 14px}
+.stick{position:sticky;top:0;z-index:10;background:var(--bg);padding:8px 0}
+.bd{display:grid;grid-template-columns:1fr auto 1fr;gap:10px}
+.side{border-radius:12px;text-align:center;padding:8px 6px;background:var(--c)}
+.nm{font:700 22px var(--num);letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tm{font:600 14px var(--ui);color:#fff;opacity:.85;min-height:20px}
+.sc{font:700 96px/1 var(--num);font-variant-numeric:tabular-nums}
+.mid{text-align:center;min-width:180px;display:flex;flex-direction:column;justify-content:center}
+.clk{font:700 64px/1 var(--num);color:var(--led);font-variant-numeric:tabular-nums}
+.clk.off{opacity:.8}.clk.end{color:#ff5a4f}.clk.to.in{color:#5cc8ff}.clk.to.bl{color:#ff5a4f}
+.clk.to.end{animation:blink 1s steps(2) infinite}@keyframes blink{50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){.clk.to.end{animation:none}}
+.per{font:600 20px var(--num);color:var(--tx)}
+.wt{color:var(--mut);font-size:14px;min-height:20px}
+.al{color:var(--led);font:700 18px var(--num);min-height:24px}
+.ctl .bd{gap:8px}.ctl .side{padding:4px}.ctl .nm{font-size:18px}.ctl .tm{font-size:12px;min-height:14px}
+.ctl .sc{font-size:60px}.ctl .clk{font-size:46px}.ctl .per{font-size:15px}.ctl .wt{font-size:12px;min-height:16px}
+.ctl .al{font-size:15px;min-height:20px}.ctl .mid{min-width:200px}
+.d .wrap{max-width:none;padding:2vw}
+.d .nm{font-size:4.2vw}.d .tm{font-size:1.9vw;min-height:2.4vw}.d .sc{font-size:24vw}.d .clk{font-size:12vw}.d .per{font-size:4vw}
+.d .wt{font-size:2.2vw;min-height:3vw}.d .al{font-size:3vw;min-height:4vw}.d .mid{min-width:34vw}
+.d .hint{color:var(--mut);text-align:center;margin-top:2vw}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px;margin-top:8px}
+.cols .panel{margin-top:0}
+.panel h2{margin:0 0 6px;font:700 16px var(--num)}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.g2,.g3{display:grid;gap:6px;margin-top:6px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
+button{font:600 14px var(--ui);color:var(--tx);background:#2a3136;border:1px solid var(--line);border-radius:8px;padding:8px 6px;cursor:pointer;min-height:40px}
+button:hover{background:#343c42}button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--led);outline-offset:2px}
+button.sb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:54px;line-height:1.1;font-size:13px}
+button.sb b{font:700 20px var(--num)}
+button.act{background:#3b4a55;outline:2px solid var(--led)}
+.r button{border-left:5px solid var(--red)}.gr button{border-left:5px solid var(--grn)}
+.go{background:var(--grn);border-color:var(--grn)}.stop{background:var(--red);border-color:var(--red)}
+.bar{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.bar button{flex:1 1 105px}
+.names{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.nw{display:flex;gap:6px}.nw select{flex:0 0 38%}
+.names .nw:first-child input{border-left:5px solid var(--red)}.names .nw:last-child input{border-left:5px solid var(--grn)}
+label{display:block;font-size:12px;color:var(--mut)}
+.chk{display:flex;gap:8px;align-items:center;font-size:15px;color:var(--tx);margin-top:8px}.chk input{width:auto}
+.hid{display:none!important}
+input,select,textarea{width:100%;font:15px var(--ui);color:var(--tx);background:#12161a;border:1px solid var(--line);border-radius:8px;padding:8px}
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+ol{margin:0;padding-left:20px;max-height:130px;overflow:auto;color:var(--mut);font-size:14px}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+td input{padding:6px}
+button.sm{min-height:28px;padding:2px 10px;font-size:13px}
+.oddrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}.oddrow label{margin:0;font-size:13px}.oddrow select{width:auto;min-width:190px}.oddrow .wt{min-height:0;flex:1 1 220px;color:var(--tx)}
+dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:12px;max-width:480px;width:92%;padding:14px}
+dialog::backdrop{background:rgba(0,0,0,.65)}
+dialog h2{margin:0 0 6px;font:700 20px var(--num)}dialog h3{margin:12px 0 0;font:700 16px var(--num)}
+@media(max-width:700px){.cols,.names{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}.sc{font-size:64px}.clk{font-size:44px}.mid{min-width:120px}
+.ctl .sc{font-size:44px}.ctl .clk{font-size:34px}.ctl .mid{min-width:110px}}
+</style></head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+const $=id=>document.getElementById(id);
+const isD=location.hash==='#display';
+let S={h:'Opponent',a:'Harpeth',cau:{st:[0,0],ih:[0,0],fs:[0,0]},note:'',to:null,used:{Injury:[0,0],Blood:[0,0]},lim:{Injury:90,Blood:300},hw:'',aw:'',pos:{},pch:{},odd:'',res:[],wt:'',sc:[0,0],per:1,np:3,pls:[120,120,120],left:120,run:false,td:3,log:[]};
+let ch=null;try{ch=new BroadcastChannel('hbc-scoreboard')}catch(e){}
+const fmt=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const send=()=>{if(ch)try{ch.postMessage(S)}catch(e){}};
+const board=`<div class="bd"><div class="side" style="--c:var(--red)"><div class="nm" id="hn"></div><div class="tm" id="ht"></div><div class="sc" id="hs">0</div></div>
+<div class="mid"><div class="wt" id="wt"></div><div class="per" id="per"></div><div class="clk" id="clk"></div><div class="al" id="al"></div></div>
+<div class="side" style="--c:var(--grn)"><div class="nm" id="an"></div><div class="tm" id="at"></div><div class="sc" id="as">0</div></div></div>`;
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function nmH(){return S.hw||S.h}function nmA(){return S.aw||S.a}
+function posTxt(){const p=S.pos[S.per],c=(S.pch||{})[S.per],by=c?' ('+(c==='r'?'red':'green')+' choice)':'';if(!p)return c&&S.per>1?' · '+(c==='r'?'Red':'Green')+' choice':'';if(p==='n')return ' · Neutral'+by;const q=p.split(':');return ' · '+(q[0]==='h'?nmH():nmA())+' '+q[1]+by}
+const PEN={st:['Stalling',[0,1,1,2,'DQ']],ih:['Illegal hold',[1,1,2,'DQ']],fs:['Caution',[0,0,1]]};
+function penVal(k,n){const a=PEN[k][1];return n<=a.length?a[n-1]:(k==='fs'?1:'DQ')}
+function paintPEN(){[0,1].forEach(w=>['st','ih','fs'].forEach(k=>{$('p'+k+w).textContent=PEN[k][0]+' ('+S.cau[k][w]+')'}))}
+function rem(t,w){const T=S.to;return T&&T.t===t&&T.w===w?T.left:S.lim[t]-S.used[t][w]}
+function paintTO(){
+  [0,1].forEach(w=>{['Injury','Blood'].forEach(t=>{const b=$((t==='Injury'?'ti':'tb')+w);b.textContent=t+' '+fmt(rem(t,w));b.classList.toggle('act',!!S.to&&S.to.t===t&&S.to.w===w)})});
+  $('toend2').hidden=!S.to;paintPEN();
+  if(S.to){$('go').textContent=(S.to.run?'Pause ':'Resume ')+S.to.t.toLowerCase()+' time';$('go').className=S.to.run?'stop':'go'}
+}
+function paint(){
+  $('hn').textContent=nmH();$('ht').textContent=S.hw?S.h:'';$('an').textContent=nmA();$('at').textContent=S.aw?S.a:'';$('hs').textContent=S.sc[0];$('as').textContent=S.sc[1];
+  $('wt').textContent=S.wt?('Weight class '+S.wt):'';
+  $('per').textContent='Period '+S.per+' of '+S.np+posTxt();
+  const c=$('clk'),T=S.to;
+  if(T){c.textContent=fmt(T.left);c.className='clk to'+(T.t==='Blood'?' bl':' in')+(T.run?'':' off')+(T.left<=0?' end':'');$('al').textContent=T.t+' time: '+(T.w?nmA():nmH())+(T.left<=0?' (time used up)':T.run?'':' (paused)');$('per').textContent+=' · Match clock '+fmt(S.left)}
+  else{c.textContent=fmt(S.left);c.className='clk'+(S.run?'':' off')+(S.left<=0?' end':'')}
+  const d=Math.abs(S.sc[0]-S.sc[1]);if(!T)$('al').textContent=S.note||(d>=15?'Technical fall: '+d+'-point lead':'');
+  if(!isD){
+    $('log').innerHTML=S.log.slice().reverse().map(l=>l[3]?'<li>'+esc(l[4]?nmA():nmH())+': '+esc(l[1])+(l[2]?', +'+l[2]+' to '+esc(l[0]?nmA():nmH()):' (no points)')+'</li>':'<li>'+esc(l[0]?nmA():nmH())+' +'+l[2]+' '+esc(l[1])+'</li>').join('')||'<li>No scoring yet</li>';
+    $('go').textContent=S.run?'Stop clock':'Start clock';$('go').className=S.run?'stop':'go';paintTO();
+  }
+}
+if(isD){
+  document.body.className='d';
+  $('app').innerHTML=board+'<div class="hint" id="hint">Click anywhere for full screen</div>';
+  document.title='Scoreboard display';
+  if(ch){ch.onmessage=e=>{if(!e.data.req){S=e.data;paint()}};ch.postMessage({req:1});}
+  document.body.onclick=()=>{$('hint').style.display='none';document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})};
+  paint();
+}else{
+  document.body.className='ctl';
+  const mmss=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  const short=s=>s%60?mmss(s):String(s/60);
+  const parseT=v=>{const m=String(v).trim().match(/^(\d+)(?::(\d{1,2}))?$/);return m?(+m[1])*60+(+(m[2]||0)):null};
+  const LEVELS={
+    hs:{n:'High school',per:[120,90,90],w:'106,113,120,126,132,138,144,150,157,165,175,190,215,285'},
+    ms:{n:'Middle school',per:[120,120,120],w:'75,82,90,98,106,114,122,130,138,145,155,170,185,215,260'},
+    ex:{n:'Exhibition',per:[120,120,120],w:'75,82,90,98,106,114,122,130,138,145,155,170,185,215,260'}};
+  const FMT=[[120,120,120],[120,90,90],[120,60,60],[90,90,90],[90,60,60],[60,60,60],[120,120],[90,90],[60,60]];
+  const ls=(k,d)=>{try{return localStorage.getItem(k)}catch(e){return d}};
+  const lw=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+  let MT=ls('hbc-mt');if(!LEVELS[MT])MT='ms';
+  let WL=null;try{WL=JSON.parse(ls('hbc-wl')||'null')}catch(e){}
+  if(!WL||typeof WL!=='object'){WL={};try{const o=JSON.parse(ls('hbc-weights')||'null');if(Array.isArray(o)&&o.length&&o.join()!=='106,113,120,126,132,138,144,150,157,165,175,190,215,285')WL.ms=o}catch(e){}}
+  ['hs','ms','ex'].forEach(k=>{if(!Array.isArray(WL[k])||!WL[k].length)WL[k]=LEVELS[k].w.split(',')});
+  let W=WL[MT];
+  const saveW=()=>lw('hbc-wl',JSON.stringify(WL));
+  const saveLU=()=>lw('hbc-lineup2',JSON.stringify(LU));
+  let LU=null;try{LU=JSON.parse(ls('hbc-lineup2')||'null')}catch(e){}
+  if(!LU||typeof LU!=='object'){LU={};try{const o=JSON.parse(ls('hbc-lineup')||'{}')||{};Object.keys(o).forEach(w=>{const a=o[w];if(Array.isArray(a)){if(a[0])(LU['Harpeth']=LU['Harpeth']||{})[w]=a[0];if(a[1])(LU['Opponent']=LU['Opponent']||{})[w]=a[1]}})}catch(e){}saveLU()}
+  const lget=(t,w)=>(LU[t]&&LU[t][w])||'';
+  const lset=(t,w,n)=>{if(!t||!w)return;(LU[t]=LU[t]||{})[w]=n;saveLU()};
+  let OUR=ls('hbc-our')||'Harpeth';
+  const isOur=t=>!!OUR.trim()&&String(t).trim().toLowerCase()===OUR.trim().toLowerCase();
+  let R=[];try{R=JSON.parse(ls('hbc-roster')||'[]')||[]}catch(e){R=[]}
+  const saveR=()=>lw('hbc-roster',JSON.stringify(R));
+  const tmatch=(r,team)=>String(r.t||OUR).trim().toLowerCase()===String(team).trim().toLowerCase();
+  const rosterAt=(w,team)=>[...new Set(R.filter(r=>r.w===w&&tmatch(r,team)).map(r=>r.n))];
+  const rosterAll=team=>[...new Set(R.filter(r=>tmatch(r,team)).map(r=>r.n))];
+  const plen=()=>S.pls[Math.min(S.per,S.pls.length)-1]||S.pls[S.pls.length-1]||120;
+  const ORDER={dual:[[0,1]],tri:[[0,1],[1,2],[0,2]],quad:[[0,1],[2,3],[0,2],[1,3],[0,3],[1,2]]};
+  const NT={dual:2,tri:3,quad:4};
+  let MEET=null;try{MEET=JSON.parse(ls('hbc-meet')||'null')}catch(e){}
+  if(!MEET||!Array.isArray(MEET.teams)||!ORDER[MEET.fmt])MEET={fmt:'dual',teams:[OUR,'Opponent','',''],done:[]};
+  while(MEET.teams.length<4)MEET.teams.push('');if(!Array.isArray(MEET.done))MEET.done=[];
+  const saveM=()=>lw('hbc-meet',JSON.stringify(MEET));
+  const pairs=()=>ORDER[MEET.fmt].filter(([i,j])=>String(MEET.teams[i]).trim()&&String(MEET.teams[j]).trim()).map(([i,j])=>({k:i+'-'+j,g:String(MEET.teams[i]).trim(),r:String(MEET.teams[j]).trim()}));
+  const curKey=()=>{const p=pairs().find(p=>p.g===S.a&&p.r===S.h);return p?p.k:''};
+  const meetMode=()=>NT[MEET.fmt]>=3&&pairs().length>1;
+  let START=0;
+  const other=c=>c==='r'?'g':'r';
+  const matchNo=()=>{const i=W.indexOf(S.wt);return i<0?0:((i-START+W.length)%W.length)+1};
+  const nextWt=()=>{const i=W.indexOf(S.wt);if(i<0)return W[START]||null;const n=(i+1)%W.length;return n===START?null:W[n]};
+  function autoChoice(){S.pch={};const m=matchNo();if(!S.odd||!m)return;const c2=m%2===1?S.odd:other(S.odd);S.pch[2]=c2;if(S.np>=3)S.pch[3]=other(c2)}
+  const sideTxt=c=>c==='r'?'red ('+S.h+')':'green ('+S.a+')';
+  function paintOdd(){const sel=$('oe');sel.innerHTML=`<option value="">Not set</option><option value="r">Red (${esc(S.h)})</option><option value="g">Green (${esc(S.a)})</option>`;sel.value=S.odd||'';
+    const m=matchNo();let t='';if(m){t='Match '+m+' ('+(m%2?'odd':'even')+')';if(S.pch[2])t+=' · Period 2 choice: '+sideTxt(S.pch[2])+(S.pch[3]?', period 3: '+sideTxt(S.pch[3]):'');else t+=' · Pick the odd team to set who chooses position'}
+    $('oinfo').textContent=t;$('osw').disabled=!S.pch[2]}
+  const SCB=()=>[['Takedown',S.td],['Escape',1],['Reversal',2],['Near fall 2s',2],['Near fall 3s',3],['Near fall 4s',4],['Penalty point',1],['Penalty points',2]];
+  const col=i=>`<div class="panel ${i?'gr':'r'}"><h2 id="t${i}"></h2><div class="g4">${SCB().map(x=>`<button class="sb" data-i="${i}" data-l="${x[0]}" data-p="${x[1]}"><span>${x[0]}</span><b>+${x[1]}</b></button>`).join('')}</div>
+   <div class="g2"><button id="ti${i}" data-t="Injury" data-w="${i}"></button><button id="tb${i}" data-t="Blood" data-w="${i}"></button></div>
+   <div class="g3"><button id="pst${i}" data-k="st" data-w="${i}"></button><button id="pih${i}" data-k="ih" data-w="${i}"></button><button id="pfs${i}" data-k="fs" data-w="${i}"></button></div></div>`;
+  $('app').innerHTML=`<div class="stick">${board}</div>
+  <div class="bar"><button id="go" class="go"></button><button id="toend2" hidden>End time-out</button><button id="undo">Undo last</button><button id="nextp">Next period</button><button id="rp">Reset period clock</button><button id="rr">Record result</button><button id="nxw">Next weight</button><button id="nm">New match</button><button id="ndb">New dual</button><button id="od">Open display window</button></div>
+  <div class="panel" id="rec" hidden><h2>Record result</h2><div class="set">
+   <div><label for="rw">Winner</label><select id="rw"></select></div>
+   <div><label for="rt">How the match ended</label><select id="rt"></select></div>
+   <div><label for="rtm">Time of ending (blank for decisions)</label><input id="rtm"></div>
+   <div><label for="rn">Notes</label><input id="rn"></div></div>
+   <div class="bar"><button id="rsave" class="go">Save result and load next weight</button><button id="rcancel">Cancel</button></div></div>
+  <div class="names"><div class="nw"><input id="hw" aria-label="Red wrestler name" placeholder="Red wrestler name"><select id="rs0" aria-label="Pick the red wrestler from the roster" hidden></select></div><div class="nw"><input id="aw" aria-label="Green wrestler name" placeholder="Green wrestler name"><select id="rs1" aria-label="Pick the green wrestler from the roster" hidden></select></div></div>
+  <div class="oddrow"><label for="oe">Odd team</label><select id="oe"></select><span class="wt" id="oinfo"></span><button id="osw" class="sm">Swap choice</button></div>
+  <div class="cols" id="cols"></div>
+  <div class="panel"><h2>Period start positions (up = top, down = bottom)</h2><div class="set" id="pos"></div></div>
+  <div class="cols"><div class="panel"><h2>Scoring log</h2><ol id="log"></ol></div>
+   <div class="panel"><h2>Match results</h2><div id="resbox"></div><div class="bar"><button id="copyres">Copy results for Google Sheets</button><button id="clrres">Clear results</button></div>
+    <label class="chk"><input type="checkbox" id="rhdr" checked>Include the header row when copying</label></div></div>
+  <div class="panel"><h2>Meet (load every team once, then pick the dual for each round)</h2><div class="set">
+   <div><label for="mf">Meet format</label><select id="mf"><option value="dual">Dual (2 teams)</option><option value="tri">Tri (3 teams)</option><option value="quad">Quad (4 teams)</option></select></div>
+   <div><label for="mm1">Team 1 (listed first, green)</label><input id="mm1"></div>
+   <div><label for="mm2">Team 2</label><input id="mm2"></div>
+   <div id="mw3"><label for="mm3">Team 3</label><input id="mm3"></div>
+   <div id="mw4"><label for="mm4">Team 4</label><input id="mm4"></div>
+   <div style="grid-column:1/-1"><label for="mp">Dual on the mat now (the team listed first is green, the team listed second is red)</label><select id="mp"></select></div></div></div>
+  <div class="panel"><h2>Match setup</h2><div class="set">
+   <div><label for="mt">Match type</label><select id="mt">${Object.entries(LEVELS).map(([k,v])=>`<option value="${k}">${v.n}</option>`).join('')}</select></div>
+   <div id="xfw" hidden><label for="xf">Exhibition period lengths</label><select id="xf"><option value="-1">Custom (set below)</option>${FMT.map((a,i)=>`<option value="${i}">${a.map(short).join('-')}</option>`).join('')}</select></div>
+   <div><label for="sw">Starting weight (sets this dual's match order)</label><select id="sw"></select></div>
+   <div><label for="inp">Number of periods</label><input id="inp" type="number" min="1" max="9" value="3"></div>
+   <div id="ptimes" style="display:contents"></div>
+   <div><label for="td">Takedown points</label><input id="td" type="number" min="1" max="4" value="3"></div>
+   <div><label for="li">Injury time per wrestler (sec)</label><input id="li" type="number" min="1" value="90"></div>
+   <div><label for="lb">Blood time per wrestler (sec)</label><input id="lb" type="number" min="1" value="300"></div>
+   <div><label for="hi">Red team (visitor)</label><input id="hi" value="Opponent"></div>
+   <div><label for="ai">Green team (home)</label><input id="ai" value="Harpeth"></div>
+   <div><label for="oc">Our club (roster rows with no team belong to this club)</label><input id="oc"></div>
+   <div style="grid-column:1/-1"><label for="wl">Weight classes in order for this match type (separate with commas)</label><input id="wl"></div></div></div>
+  <div class="panel"><h2>Roster: wrestlers by weight and team (one wrestler can be listed at more than one weight)</h2>
+   <p class="wt">Columns: Weight, Name and Team, one row per wrestler per weight. Team is optional, and rows without a team belong to your club (set under Match setup). Load every team in the meet, then pick wrestlers on both sides. Copy the cells from your Google Sheet and paste them here, or load a Sheet that is shared or published to the web.</p>
+   <textarea id="rtxt" rows="4" placeholder="Weight&#9;Name&#9;Team&#10;106&#9;Sam Smith&#9;Harpeth&#10;113&#9;Joe Lee&#9;Harpeth&#10;113&#9;Ben Cruz&#9;Team A"></textarea>
+   <div class="bar"><button id="rload">Load pasted roster</button><button id="rclear">Clear roster</button></div>
+   <div style="margin-top:8px"><label for="rurl">Google Sheet link</label><input id="rurl" placeholder="https://docs.google.com/spreadsheets/d/..."></div>
+   <div class="bar"><button id="rfetch">Load from Google Sheet link</button></div><p class="wt" id="rstat"></p></div>
+  <div class="panel"><h2>Lineup: enter wrestlers ahead of time (saved by team; the next weight loads after each result)</h2><div id="lu" style="overflow-x:auto"></div>
+   <div class="bar"><button id="lc0">Clear red team lineup</button><button id="lc1">Clear green team lineup</button></div></div>
+  <p class="wt">Drag the display window to the monitor, then click inside it for full screen. Space bar starts and stops the clock. Keep this page open during the match.</p>
+  <dialog id="ed"><h2>Edit result</h2><div class="set">
+   <div><label for="ew">Weight</label><input id="ew"></div>
+   <div><label for="eh">Red wrestler</label><input id="eh"></div>
+   <div><label for="ea">Green wrestler</label><input id="ea"></div>
+   <div><label for="ehs">Red score</label><input id="ehs" type="number" min="0"></div>
+   <div><label for="eas">Green score</label><input id="eas" type="number" min="0"></div>
+   <div><label for="eww">Winner</label><select id="eww"></select></div>
+   <div><label for="ert">How the match ended</label><select id="ert"></select></div>
+   <div><label for="etm">Time of ending</label><input id="etm"></div>
+   <div style="grid-column:1/-1"><label for="en">Notes</label><input id="en"></div></div>
+   <div class="bar"><button id="esave" class="go">Save changes</button><button id="edel">Delete result</button><button id="ecancel">Cancel</button></div></dialog>
+  <dialog id="nd"><h2>Start a new dual</h2>
+   <p class="wt" id="ndmsg"></p>
+   <div id="ndres"><button id="ndcopy">Copy results for Google Sheets</button>
+    <label class="chk" id="ndokw"><input type="checkbox" id="ndok">I have pasted the results into my Sheet</label></div>
+   <div id="ndmeet" class="hid"><h3>Which dual is next?</h3><select id="ndp" aria-label="Next dual"></select></div>
+   <div id="ndteams"><h3>Which teams are in the next dual?</h3>
+   <label class="chk"><input type="checkbox" id="nk0"><span id="nl0"></span></label>
+   <div id="nw0"><label for="nn0">New red team name</label><input id="nn0"></div>
+   <label class="chk"><input type="checkbox" id="nk1" checked><span id="nl1"></span></label>
+   <div id="nw1" class="hid"><label for="nn1">New green team name</label><input id="nn1"></div></div>
+   <div class="bar"><button id="ndgo" class="go"></button><button id="ndkeep">Start dual, keep results</button><button id="ndcancel">Cancel</button></div></dialog>`;
+  function names(){$('t0').textContent=nmH()+' (red)';$('t1').textContent=nmA()+' (green)'}
+  const cols=()=>{$('cols').innerHTML=col(0)+col(1);names()};
+  cols();
+  const inProg=()=>!!(S.sc[0]||S.sc[1]||S.log.length||S.to||S.run||S.per>1||S.left<plen());
+  function resetMatch(){S.sc=[0,0];S.log=[];S.per=1;S.left=S.pls[0]||120;S.run=false;S.pos={};S.pch={};S.note='';S.cau={st:[0,0],ih:[0,0],fs:[0,0]};S.to=null;S.used={Injury:[0,0],Blood:[0,0]}}
+  function buildSW(){$('sw').innerHTML='<option value="">None</option>'+W.map(w=>`<option value="${esc(w)}">${esc(w)}</option>`).join('');$('sw').value=S.wt}
+  function buildLU(){$('lu').innerHTML='<table><tr><th>Weight</th><th>'+esc(S.h)+' (red)</th><th>'+esc(S.a)+' (green)</th></tr>'+W.map((w,i)=>`<tr><td>${esc(w)}</td>`+[0,1].map(s=>{const t=s?S.a:S.h;return `<td><input list="dl${s}_${i}" aria-label="${esc(t)} wrestler at ${esc(w)}" data-w="${esc(w)}" data-s="${s}" value="${esc(lget(t,w))}"></td>`}).join('')+'</tr>').join('')+'</table>'+W.map((w,i)=>[0,1].map(s=>{const t=s?S.a:S.h,at=rosterAt(w,t),nn=at.length?at:rosterAll(t);return '<datalist id="dl'+s+'_'+i+'">'+nn.map(n=>'<option value="'+esc(n)+'">').join('')+'</datalist>'}).join('')).join('')}
+  function luSync(){document.querySelectorAll('#lu input').forEach(x=>{const v=lget(+x.dataset.s?S.a:S.h,x.dataset.w);if(x.value!==v)x.value=v})}
+  function buildPick(){[0,1].forEach(s=>{const sel=$('rs'+s),t=s?S.a:S.h,all=rosterAll(t);if(!all.length){sel.hidden=true;return}const at=rosterAt(S.wt,t),rest=all.filter(n=>!at.includes(n)),o=n=>`<option value="${esc(n)}">${esc(n)}</option>`;sel.innerHTML='<option value="">Pick from roster</option>'+(at.length?`<optgroup label="Weight ${esc(S.wt)}">${at.map(o).join('')}</optgroup>`:'')+(rest.length?`<optgroup label="${at.length?'Other wrestlers':'All wrestlers'}">${rest.map(o).join('')}</optgroup>`:'');sel.hidden=false;sel.value=''})}
+  function parseRoster(t){const rows=t.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>{if(l.includes('\t'))return l.split('\t').map(x=>x.trim());const out=[];let cur='',q=false;for(const c of l){if(c==='"')q=!q;else if(c===','&&!q){out.push(cur.trim());cur=''}else cur+=c}out.push(cur.trim());return out});if(!rows.length)return [];let wi=0,ni=1,ti=2;const h=rows[0].map(x=>x.toLowerCase()),hw=h.findIndex(x=>/weight|wt/.test(x)),ht=h.findIndex(x=>/team|school|club/.test(x)),hn=h.findIndex((x,i)=>i!==ht&&/name|wrestler/.test(x));
+    if(hw>=0||hn>=0||ht>=0){if(hw>=0)wi=hw;if(hn>=0)ni=hn;else ni=[0,1,2].find(i=>i!==wi&&i!==ht)||1;ti=ht}
+    if(hw>=0||hn>=0||ht>=0)rows.shift();
+    const out=[];rows.forEach(r=>{const n=(r[ni]||'').trim();if(!n)return;const tm=ti>=0?(r[ti]||'').trim():'';(r[wi]||'').split(/[;\/|]/).map(x=>x.trim()).filter(Boolean).forEach(w=>out.push({w,n,t:tm}))});return out}
+  function rosterStatus(m){const ws=new Set(R.map(r=>r.w)),miss=[...ws].filter(w=>!W.includes(w)),tm=[...new Set(R.map(r=>r.t||OUR))];$('rstat').textContent=(m?m+'. ':'')+R.length+' entries, '+new Set(R.map(r=>r.n)).size+' wrestlers, '+ws.size+' weights. Teams: '+(tm.join(', ')||'none')+'.'+(miss.length?' Not in the current weight list: '+miss.join(', ')+'.':'')}
+  function setRoster(list,m){const seen=new Set();R=list.filter(r=>{const k=r.w+'|'+r.n+'|'+(r.t||'');if(seen.has(k))return false;seen.add(k);return true});saveR();buildPick();buildLU();rosterStatus(m)}
+  function syncNames(){$('hw').value=S.hw;$('aw').value=S.aw}
+  function loadWeight(w,msg){resetMatch();S.wt=w;autoChoice();let r=lget(S.h,w),g=lget(S.a,w);
+    if(w&&!r){const c=rosterAt(w,S.h);if(c.length===1){r=c[0];lset(S.h,w,r)}}
+    if(w&&!g){const c=rosterAt(w,S.a);if(c.length===1){g=c[0];lset(S.a,w,g)}}
+    S.hw=r;S.aw=g;if(msg)S.note=msg;syncNames();luSync();$('sw').value=w;buildPick();paintOdd();names();buildPos();paint();send()}
+  function advance(){const i=W.indexOf(S.wt);const nx=nextWt();if(i>=0&&nx){loadWeight(nx,'Next up: weight '+nx)}else if(i>=0){const ck=curKey();if(ck&&!MEET.done.includes(ck)){MEET.done.push(ck);saveM()}loadWeight('','All weight classes complete');buildMeet();openND()}else{loadWeight('')}}
+  function buildPT(){let h='';for(let p=1;p<=S.np;p++)h+=`<div><label for="pt${p}">Period ${p} (m:ss)</label><input id="pt${p}" inputmode="numeric" value="${mmss(S.pls[p-1]||120)}"></div>`;$('ptimes').innerHTML=h}
+  function setPeriods(a){S.pls=a.slice();S.np=a.length;$('inp').value=S.np;buildPT();if(!S.run){S.left=plen();S.per=Math.min(S.per,S.np)}buildPos();paint();send()}
+  const setT=()=>{const a=[];for(let p=1;p<=S.np;p++){const el=$('pt'+p),v=el?parseT(el.value):null;a.push(v!=null&&v>0?v:(S.pls[p-1]||S.pls[S.pls.length-1]||120))}S.pls=a;if(!S.run){S.left=plen();S.per=Math.min(S.per,S.np)}buildPos();paint();send()};
+  const custom=()=>{if(MT==='ex')$('xf').value='-1'};
+  function applyType(t){MT=t;lw('hbc-mt',t);W=WL[t];$('mt').value=t;$('xfw').hidden=t!=='ex';const xi=+$('xf').value;setPeriods(t==='ex'?(xi>=0?FMT[xi]:S.pls):LEVELS[t].per);$('wl').value=W.join(', ');buildSW();buildLU()}
+  $('cols').onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+    if(d.p!==undefined){const i=+d.i,p=+d.p;S.sc[i]+=p;S.log.push([i,d.l,p]);paint();send()}
+    else if(d.t){endTO();S.run=false;const t=d.t,w=+d.w,l=S.lim[t]-S.used[t][w];S.to={t,w,left:Math.max(0,l),run:l>0};paint();send()}
+    else if(d.k){const k=d.k,w=+d.w,o=1-w;S.cau[k][w]++;const n=S.cau[k][w],v=penVal(k,n),nm=w?nmA():nmH(),L=PEN[k][0];let msg;
+      if(v==='DQ'){msg=L+' #'+n+': '+nm+' is disqualified';S.run=false}
+      else if(v===0){msg=k==='st'?L+' warning: '+nm:k==='fs'?L+' #'+n+': '+nm:L+' caution: '+nm}
+      else{msg=L+' #'+n+': '+v+' point'+(v>1?'s':'')+' to '+(o?nmA():nmH());S.sc[o]+=v}
+      S.log.push([o,L+' #'+n,v==='DQ'?0:v,k,w]);S.note=msg;paint();send()}};
+  const endTO=()=>{const T=S.to;if(T){S.used[T.t][T.w]=S.lim[T.t]-T.left;S.to=null}};
+  const clk=()=>{if(S.to){if(S.to.left>0){S.to.run=!S.to.run;paint();send()}return}S.run=!S.run;if(S.run)S.note='';paint();send()};
+  $('go').onclick=clk;
+  $('toend2').onclick=()=>{endTO();paint();send()};
+  document.onkeydown=e=>{if(e.code==='Space'&&!/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)&&!document.querySelector('dialog[open]')){e.preventDefault();clk()}};
+  $('undo').onclick=()=>{const l=S.log.pop();if(l){S.sc[l[0]]-=l[2];if(l[3])S.cau[l[3]][l[4]]--;S.note=''}paint();send()};
+  $('nextp').onclick=()=>{if(S.per<S.np)S.per++;S.left=plen();S.run=false;S.note='';paint();send()};
+  $('rp').onclick=()=>{S.left=plen();S.run=false;paint();send()};
+  $('nm').onclick=()=>{if(confirm('Start a new match? Scores and log will be cleared.'))loadWeight(S.wt)};
+  $('nxw').onclick=()=>{if(inProg()&&!confirm('Skip to the next weight? The current match will be cleared.'))return;const nx=W.indexOf(S.wt)<0?(START=0,W[0]):nextWt();if(nx)loadWeight(nx,'Next up: weight '+nx);else loadWeight('','All weight classes complete')};
+  $('mt').onchange=()=>{const t=$('mt').value;if(inProg()&&!confirm('Change the match type? The current match will be cleared.')){$('mt').value=MT;return}applyType(t);START=0;loadWeight(W[0])};
+  $('xf').onchange=()=>{const i=+$('xf').value;if(i>=0)setPeriods(FMT[i])};
+  $('inp').oninput=()=>{const n=Math.max(1,Math.min(9,+$('inp').value||1));const a=[];for(let p=0;p<n;p++)a.push(S.pls[p]||S.pls[S.pls.length-1]||120);S.pls=a;S.np=n;buildPT();custom();setT()};
+  $('ptimes').oninput=()=>{custom();setT()};
+  $('td').oninput=()=>{S.td=Math.max(1,+$('td').value||3);cols();paint();send()};
+  ['li','lb'].forEach(id=>$(id).oninput=()=>{S.lim={Injury:Math.max(1,+$('li').value||90),Blood:Math.max(1,+$('lb').value||300)};paint();send()});
+  [['hi',0],['ai',1]].forEach(([id,s])=>$(id).onchange=()=>{const v=$(id).value.trim()||(s?'Harpeth':'Opponent');if(s)S.a=v;else S.h=v;$(id).value=v;S.hw=lget(S.h,S.wt);S.aw=lget(S.a,S.wt);syncNames();names();buildPick();buildLU();buildPos();paintOdd();paint();send()});
+  $('oc').onchange=()=>{OUR=$('oc').value.trim();lw('hbc-our',OUR);buildPick();buildLU()};
+  [['hw',0],['aw',1]].forEach(([id,s])=>$(id).oninput=()=>{const v=$(id).value;if(s)S.aw=v;else S.hw=v;lset(s?S.a:S.h,S.wt,v);luSync();names();buildPos();paint();send()});
+  [0,1].forEach(s=>{$('rs'+s).onchange=()=>{const v=$('rs'+s).value;if(v){const f=$(s?'aw':'hw');f.value=v;f.oninput()}$('rs'+s).value=''}});
+  $('lu').oninput=e=>{const x=e.target;if(!x.dataset.w)return;const s=+x.dataset.s,w=x.dataset.w;lset(s?S.a:S.h,w,x.value);if(w===S.wt){if(s)S.aw=x.value;else S.hw=x.value;syncNames();names();buildPos();paint();send()}};
+  [0,1].forEach(s=>{$('lc'+s).onclick=()=>{const t=s?S.a:S.h;if(!confirm('Clear the saved lineup for '+t+'?'))return;delete LU[t];saveLU();if(s)S.aw='';else S.hw='';syncNames();buildLU();names();buildPos();paint();send()}});
+  $('sw').onchange=()=>{const w=$('sw').value;if(inProg()&&!confirm('Load weight '+(w||'(none)')+'? The current match will be cleared.')){$('sw').value=S.wt;return}START=Math.max(0,W.indexOf(w));loadWeight(w)};
+  $('wl').onchange=()=>{const v=$('wl').value.split(/[,\s]+/).map(x=>x.trim()).filter((x,i,a)=>x&&a.indexOf(x)===i);if(v){WL[MT]=v;W=v;saveW()}$('wl').value=W.join(', ');buildSW();buildLU();if(R.length)rosterStatus('')};
+  function buildMeet(){$('mf').value=MEET.fmt;[1,2,3,4].forEach(n=>{$('mm'+n).value=MEET.teams[n-1]});$('mw3').hidden=NT[MEET.fmt]<3;$('mw4').hidden=NT[MEET.fmt]<4;const ps=pairs(),ck=curKey();$('mp').innerHTML=(ck?'':'<option value="">Choose a dual</option>')+ps.map(p=>`<option value="${p.k}">${esc(p.g)} (green) vs ${esc(p.r)} (red)${MEET.done.includes(p.k)?' (done)':''}</option>`).join('');$('mp').value=ck}
+  function applyPair(k){const p=pairs().find(x=>x.k===k);if(!p)return;S.a=p.g;S.h=p.r;$('hi').value=S.h;$('ai').value=S.a;buildLU();S.odd='';START=0;loadWeight(W[0],'Next up: '+S.a+' vs '+S.h);buildMeet()}
+  $('oe').onchange=()=>{S.odd=$('oe').value;autoChoice();paintOdd();paint();send()};
+  $('osw').onclick=()=>{const a=S.pch[2];if(!a)return;S.pch[2]=other(a);if(S.np>=3)S.pch[3]=a;paintOdd();paint();send()};
+  $('mf').onchange=()=>{MEET.fmt=$('mf').value;MEET.done=[];saveM();buildMeet()};
+  [1,2,3,4].forEach(n=>$('mm'+n).onchange=()=>{MEET.teams[n-1]=$('mm'+n).value.trim();MEET.done=[];saveM();buildMeet()});
+  $('mp').onchange=()=>{const k=$('mp').value;if(!k)return;if(inProg()&&!confirm('Load this dual? The current match will be cleared.')){buildMeet();return}applyPair(k)};
+  $('od').onclick=()=>{window.open(location.href.split('#')[0]+'#display','scoreboard','width=1280,height=720')};
+  function buildPos(){let h='';for(let p=2;p<=S.np;p++){const v=S.pos[p]||'';const o=[['','Not set'],['n','Neutral'],['h:up',nmH()+' up'],['h:down',nmH()+' down'],['a:up',nmA()+' up'],['a:down',nmA()+' down']];h+=`<div><label for="pp${p}">Period ${p} start</label><select id="pp${p}" data-p="${p}">`+o.map(x=>`<option value="${x[0]}"${x[0]===v?' selected':''}>${esc(x[1])}</option>`).join('')+'</select></div>'}$('pos').innerHTML=h}
+  $('pos').onchange=e=>{const p=e.target.dataset.p;if(p){S.pos[p]=e.target.value;paint();send()}};
+  const RT=[['Decision',3],['Major decision',4],['Technical fall',5],['Fall (pin)',6],['Forfeit',6],['Medical forfeit',6],['Injury default',6],['Default',6],['Disqualification',6],['Decision (overtime)',3]];
+  $('rt').innerHTML=RT.map((x,i)=>`<option value="${i}">${x[0]} (${x[1]} team pts)</option>`).join('');
+  const keep=()=>lw('hbc-res',JSON.stringify(S.res));
+  try{S.res=JSON.parse(ls('hbc-res')||'[]')||[]}catch(e){S.res=[]}
+  const ending=()=>{if([0,1,9].includes(+$('rt').value))return '';const el=Math.max(0,Math.floor(plen()-S.left));return 'P'+S.per+' '+Math.floor(el/60)+':'+String(el%60).padStart(2,'0')};
+  $('rt').onchange=()=>{$('rtm').value=ending()};
+  $('rr').onclick=()=>{S.run=false;const d=S.sc[0]-S.sc[1],a=Math.abs(d);$('rw').innerHTML=`<option value="0">${esc(nmH())} (red)</option><option value="1">${esc(nmA())} (green)</option>`;$('rw').value=d<0?'1':'0';$('rt').value=a>=15?'2':a>=8?'1':'0';$('rtm').value=ending();$('rn').value='';$('rec').hidden=false;$('rec').scrollIntoView({behavior:'smooth',block:'center'});paint();send()};
+  $('rcancel').onclick=()=>{$('rec').hidden=true};
+  $('rsave').onclick=()=>{const t=RT[+$('rt').value];S.res.push({d:new Date().toLocaleDateString('en-CA'),wt:S.wt,h:nmH(),ht:S.h,a:nmA(),at:S.a,hs:S.sc[0],as:S.sc[1],w:+$('rw').value,type:t[0],pts:t[1],time:$('rtm').value,note:$('rn').value});keep();$('rec').hidden=true;paintRes();advance();if(!$('nd').open)window.scrollTo({top:0,behavior:'smooth'})};
+  function paintRes(){const R2=S.res;if(!R2.length){$('resbox').innerHTML='<p class="wt">No results recorded yet.</p>';return}const gp={};R2.forEach(r=>{const key=[r.ht,r.at].sort().join(' vs '),g=gp[key]=gp[key]||{};if(!(r.ht in g))g[r.ht]=0;if(!(r.at in g))g[r.at]=0;g[r.w?r.at:r.ht]+=r.pts});$('resbox').innerHTML='<div style="overflow-x:auto"><table><tr><th>Wt</th><th>Red</th><th>Green</th><th>Score</th><th>Winner</th><th>Result</th><th>Time</th><th>Pts</th><th></th></tr>'+R2.map((r,i)=>`<tr><td>${esc(r.wt)}</td><td>${esc(r.h)}</td><td>${esc(r.a)}</td><td>${r.hs}-${r.as}</td><td>${esc(r.w?r.a:r.h)}</td><td>${esc(r.type)}</td><td>${esc(r.time)}</td><td>${r.pts}</td><td><button class="sm" data-e="${i}">Edit</button></td></tr>`).join('')+'</table></div><p class="wt">'+Object.entries(gp).map(([k,g])=>'<b>'+esc(k)+'</b>: '+Object.entries(g).map(([t,v])=>esc(t)+' '+v).join(', ')).join('<br>')+'</p>'}
+  let EI=-1;
+  function openED(i){const r=S.res[i];if(!r)return;EI=i;$('ew').value=r.wt||'';$('eh').value=r.h||'';$('ea').value=r.a||'';$('ehs').value=r.hs;$('eas').value=r.as;
+    $('eww').innerHTML=`<option value="0">${esc(r.h)} (red, ${esc(r.ht)})</option><option value="1">${esc(r.a)} (green, ${esc(r.at)})</option>`;$('eww').value=String(r.w);
+    $('ert').innerHTML=RT.map((x,k)=>`<option value="${k}">${x[0]} (${x[1]} team pts)</option>`).join('');$('ert').value=String(Math.max(0,RT.findIndex(x=>x[0]===r.type)));
+    $('etm').value=r.time||'';$('en').value=r.note||'';$('ed').showModal()}
+  $('resbox').onclick=e=>{const b=e.target.closest('button[data-e]');if(b)openED(+b.dataset.e)};
+  $('esave').onclick=()=>{const r=S.res[EI];if(!r)return;const t=RT[+$('ert').value];r.wt=$('ew').value.trim();r.h=$('eh').value.trim()||r.h;r.a=$('ea').value.trim()||r.a;r.hs=+$('ehs').value||0;r.as=+$('eas').value||0;r.w=+$('eww').value;r.type=t[0];r.pts=t[1];r.time=$('etm').value;r.note=$('en').value;keep();$('ed').close();paintRes()};
+  $('edel').onclick=()=>{if(S.res[EI]&&confirm('Delete this result? This cannot be undone.')){S.res.splice(EI,1);keep();$('ed').close();paintRes()}};
+  $('ecancel').onclick=()=>$('ed').close();
+  function copyRes(btn){if(!S.res.length){const l=btn.textContent;btn.textContent='No results yet';setTimeout(()=>btn.textContent=l,1500);return}
+    const hdr=['Date','Weight','Red wrestler','Red team','Green wrestler','Green team','Red score','Green score','Winner','Winning team','Result','Time','Team pts','Notes'];
+    const rows=S.res.map(r=>[r.d||'',r.wt,r.h,r.ht,r.a,r.at,r.hs,r.as,r.w?r.a:r.h,r.w?r.at:r.ht,r.type,r.time,r.pts,r.note]);
+    const t=($('rhdr').checked?[hdr]:[]).concat(rows).map(r=>r.map(x=>String(x==null?'':x).replace(/[\t\r\n]+/g,' ')).join('\t')).join('\n');
+    const lab=btn.textContent,done=()=>{btn.textContent='Copied';setTimeout(()=>btn.textContent=lab,1500)};
+    const fb=()=>{const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy');done()}catch(e){}x.remove()};
+    if(navigator.clipboard)navigator.clipboard.writeText(t).then(done,fb);else fb()}
+  $('copyres').onclick=()=>copyRes($('copyres'));
+  $('clrres').onclick=()=>{if(S.res.length&&confirm('Clear all recorded results?')){S.res=[];keep();paintRes()}};
+  function openND(){const n=S.res.length;$('ndmsg').textContent=n?(n+' result'+(n>1?'s are':' is')+' recorded. Copy them to your Sheet before clearing.'):'No results are recorded yet.';
+    $('ndres').classList.toggle('hid',!n);$('ndok').checked=false;$('ndgo').disabled=!!n;$('ndgo').textContent=n?'Start dual and clear results':'Start dual';$('ndkeep').classList.toggle('hid',!n);
+    const mm=meetMode();$('ndmeet').classList.toggle('hid',!mm);$('ndteams').classList.toggle('hid',mm);
+    if(mm){const ps=pairs(),ck=curKey();$('ndp').innerHTML=ps.map(p=>`<option value="${p.k}">${esc(p.g)} (green) vs ${esc(p.r)} (red)${MEET.done.includes(p.k)?' (done)':''}</option>`).join('');const nx=ps.find(p=>p.k!==ck&&!MEET.done.includes(p.k))||ps.find(p=>p.k!==ck)||ps[0];$('ndp').value=nx.k}
+    else [0,1].forEach(s=>{$('nl'+s).textContent=(s?S.a:S.h)+' ('+(s?'green':'red')+') is in the next dual';$('nk'+s).checked=s===1;$('nn'+s).value='';$('nw'+s).classList.toggle('hid',s===1)});
+    $('nd').showModal()}
+  [0,1].forEach(s=>{$('nk'+s).onchange=()=>{$('nw'+s).classList.toggle('hid',$('nk'+s).checked);if(!$('nk'+s).checked)$('nn'+s).focus()}});
+  $('ndok').onchange=()=>{$('ndgo').disabled=!$('ndok').checked};
+  $('ndcopy').onclick=()=>copyRes($('ndcopy'));
+  $('ndcancel').onclick=()=>$('nd').close();
+  function startND(clear){let nt=[S.h,S.a];
+    if(meetMode()){const p=pairs().find(x=>x.k===$('ndp').value);if(!p)return;const ck=curKey();if(ck&&!MEET.done.includes(ck)){MEET.done.push(ck);saveM()}nt=[p.r,p.g]}
+    else for(const s of [0,1]){if(!$('nk'+s).checked){const v=$('nn'+s).value.trim();if(!v){$('nn'+s).focus();return}nt[s]=v}}
+    S.h=nt[0];S.a=nt[1];$('hi').value=S.h;$('ai').value=S.a;if(clear){S.res=[];keep();paintRes()}
+    $('nd').close();buildLU();S.odd='';START=0;loadWeight(W[0],'New dual: '+S.a+' vs '+S.h);buildMeet();window.scrollTo({top:0,behavior:'smooth'})}
+  $('ndgo').onclick=()=>startND(true);$('ndkeep').onclick=()=>startND(false);
+  $('ndb').onclick=openND;
+  $('rs0').hidden=$('rs1').hidden=true;
+  $('rload').onclick=()=>{const l=parseRoster($('rtxt').value);if(!l.length){$('rstat').textContent='No wrestlers found. Use columns: Weight, Name and Team (Team is optional).';return}setRoster(l,'Roster loaded')};
+  $('rclear').onclick=()=>{if(R.length&&!confirm('Clear the roster?'))return;R=[];saveR();$('rtxt').value='';buildPick();buildLU();rosterStatus('Roster cleared')};
+  $('rfetch').onclick=async()=>{let u=$('rurl').value.trim();if(!u)return;lw('hbc-rurl',u);
+    const m=u.match(/\/spreadsheets\/d\/(e\/)?([\w-]+)/),g=(u.match(/gid=(\d+)/)||[])[1];
+    if(m&&!/output=csv|out:csv|format=csv/.test(u))u=m[1]?'https://docs.google.com/spreadsheets/d/e/'+m[2]+'/pub?output=csv'+(g?'&gid='+g:''):'https://docs.google.com/spreadsheets/d/'+m[2]+'/gviz/tq?tqx=out:csv'+(g?'&gid='+g:'');
+    $('rstat').textContent='Loading...';
+    try{const rs=await fetch(u);if(!rs.ok)throw new Error('http '+rs.status);const t=await rs.text();if(/<html|<!doctype/i.test(t.slice(0,200)))throw new Error('not csv');const l=parseRoster(t);if(!l.length)throw new Error('empty');setRoster(l,'Loaded from the Google Sheet')}
+    catch(e){$('rstat').textContent='Could not read that link from this page. Make sure the sheet is shared as "anyone with the link can view" (or published to the web as CSV), or copy the cells and paste them into the box above.'}};
+  $('rurl').value=ls('hbc-rurl')||'';
+  if(ch)ch.onmessage=e=>{if(e.data&&e.data.req)send()};
+  let last=Date.now();
+  setInterval(()=>{const n=Date.now();if(S.run){S.left-=(n-last)/1000;if(S.left<=0){S.left=0;S.run=false}paint();send()}
+    if(S.to&&S.to.run){S.to.left-=(n-last)/1000;if(S.to.left<=0){S.to.left=0;S.to.run=false}paint();send()}last=n},100);
+  {const p0=pairs()[0];if(p0){S.a=p0.g;S.h=p0.r}}
+  $('oc').value=OUR;$('hi').value=S.h;$('ai').value=S.a;
+  $('xf').innerHTML=$('xf').innerHTML;$('xf').value='0';
+  paintRes();applyType(MT);if(R.length)rosterStatus('');
+  loadWeight(W[0]);buildMeet();
+}
+</script></body></html>
